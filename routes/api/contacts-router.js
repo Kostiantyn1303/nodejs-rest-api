@@ -2,7 +2,7 @@ import express from "express";
 
 import contactsController from "../../controllers/contacts-controllers.js";
 
-import contactsSchema from "../../schemes/validate-schames.js";
+import contactsSchema from "../../schames/validate-schames.js";
 
 import { validateBody } from "../../decorators/index.js";
 
