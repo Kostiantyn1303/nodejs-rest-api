@@ -7,5 +7,13 @@ const isEmptyBody = (req, res, next) => {
   }
   next();
 };
+const isEmptyBodyFavorite = (req, res, next) => {
+  if (req.method === "PATCH") {
+    if (!req.body.hasOwnProperty("favorite") || req.body.favorite === "") {
+      next(HttpError(400, "missing field favorite"));
+    }
+  }
+  next();
+};
 
-export default isEmptyBody;
+export { isEmptyBody as default, isEmptyBodyFavorite };
