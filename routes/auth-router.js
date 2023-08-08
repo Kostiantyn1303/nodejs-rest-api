@@ -3,6 +3,7 @@ import { validateBody } from "../decorators/index.js";
 import usersSchemas from "../schames/users-schemas.js";
 import authController from "../controllers/auth-controller.js";
 import { authenticate } from "../middlewares/index.js";
+import { upload } from "../middlewares/index.js";
 const authRouter = express.Router();
 authRouter.post(
   "/register",
@@ -16,4 +17,10 @@ authRouter.post(
 );
 authRouter.post("/logout", authenticate, authController.signout);
 authRouter.get("/current", authenticate, authController.getCurrent);
+authRouter.patch(
+  "/avatars",
+  authenticate,
+  upload.single("avatar"),
+  authController.updateAvatar
+);
 export default authRouter;

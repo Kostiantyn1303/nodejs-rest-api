@@ -1,8 +1,12 @@
+import fs from "fs/promises";
+import path from "path";
+import gravatar from "gravatar";
 import User from "../models/user.js";
 import { ctrlWrapper } from "../decorators/index.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { HttpError } from "../helpers/index.js";
+import { HttpError, processingImage } from "../helpers/index.js";
+const avatarsPath = path.resolve("public", "avatars");
 const { JWT_SECRET } = process.env;
 const registration = async (req, res) => {
   const { email, password } = req.body;
@@ -11,7 +15,12 @@ const registration = async (req, res) => {
     throw HttpError(409, "Email in use");
   }
   const hashPassword = await bcrypt.hash(password, 10);
-  const newUser = await User.create({ ...req.body, password: hashPassword });
+  const avatarURL = gravatar.url(email);
+  const newUser = await User.create({
+    ...req.body,
+    password: hashPassword,
+    avatarURL,
+  });
   res.status(201, "Created").json({
     user: {
       email: newUser.email,
@@ -59,9 +68,26 @@ const signout = async (req, res) => {
     message: "Signout ssucess",
   });
 };
+const updateAvatar = async (req, res) => {
+  const { _id } = req.user;
+  const { path: tempPath, originalname } = req.file;
+
+  const uniqueFileName = `${_id}_${originalname}`;
+  const newPath = path.join(avatarsPath, uniqueFileName);
+
+  await processingImage(tempPath, newPath);
+
+  await fs.unlink(tempPath);
+  const avatarURL = path.join("avatars", uniqueFileName);
+  await User.findByIdAndUpdate(_id, { avatarURL });
+  res.json({
+    avatarURL,
+  });
+};
 export default {
   registration: ctrlWrapper(registration),
   signin: ctrlWrapper(signin),
   getCurrent: ctrlWrapper(getCurrent),
   signout: ctrlWrapper(signout),
+  updateAvatar: ctrlWrapper(updateAvatar),
 };
