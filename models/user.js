@@ -18,6 +18,14 @@ const userSchema = new Schema({
     default: "starter",
   },
   avatarURL: { type: String, required: true },
+  verify: {
+    type: Boolean,
+    default: false,
+  },
+  verificationToken: {
+    type: String,
+    required: [true, "Verify token is required"],
+  },
   token: String,
 });
 userSchema.pre("findOneAndUpdate", validateAtUpdate);
